@@ -14,7 +14,7 @@ class Client
 
   public function __construct($server = 'localhost', $port = 8081)
   {
-    $this->_server = '108.178.0.234'; //$server;
+    $this->_server = $server;
     $this->_port   = $port;
   }
 
