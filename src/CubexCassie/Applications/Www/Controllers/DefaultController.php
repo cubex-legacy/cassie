@@ -30,7 +30,7 @@ class DefaultController extends WebpageController
 
   public function renderIndex()
   {
-    $mxj       = new Client();
+    $mxj       = new Client($this->config('cassandra')->getStr('server'));
     $readStage = $mxj->loadMBean(
       'org.apache.cassandra.request',
       ['type' => 'ReadStage']
