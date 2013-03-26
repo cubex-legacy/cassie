@@ -20,15 +20,32 @@ class Client
 
   public function loadMBean($objectName, array $parameters = null)
   {
-    $path = 'mbean?objectname=' . $objectName;
+    $path = 'mbean?template=identity&objectname=' . $objectName;
     if($parameters !== null)
     {
-      $path .= ':' . http_build_query($parameters);
+      $path .= ':' . http_build_query($parameters, null, ',');
     }
-    $path .= '&template=identity';
     $rawResponse = $this->_directCall($path);
     return new MBeanResponse($rawResponse);
   }
+
+  public function loadAttribute(
+    $objectName, $format, $attribute, array $parameters = null
+  )
+  {
+    $path = 'getattribute?template=identity';
+    $path .= '&attribute=' . $attribute;
+    $path .= '&format=' . $format;
+    $path .= '&objectname=' . $objectName;
+    if($parameters !== null)
+    {
+      $path .= ':' . http_build_query($parameters, null, ',');
+    }
+    $rawResponse = $this->_directCall($path);
+
+    return new MBeanResponse($rawResponse);
+  }
+
 
   protected function _directCall($path)
   {

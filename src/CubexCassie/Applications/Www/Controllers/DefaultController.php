@@ -8,9 +8,11 @@ namespace CubexCassie\Applications\Www\Controllers;
 use Cubex\Core\Controllers\WebpageController;
 use Cubex\Database\ConnectionMode;
 use Cubex\Form\Form;
+use Cubex\KvStore\Cassandra\Connection;
 use Cubex\View\HtmlElement;
 use Cubex\View\Templates\Errors\Error404;
 use CubexCassie\Components\MX4J\Client;
+use CubexCassie\Components\Thrift\Ring;
 
 class DefaultController extends WebpageController
 {
@@ -30,7 +32,19 @@ class DefaultController extends WebpageController
 
   public function renderIndex()
   {
-    $mxj       = new Client($this->config('cassandra')->getStr('server'));
+    $server = $this->config('cassie')->getStr('server');
+    $connection = new Connection([$server]);
+
+    $ring = new Ring($connection);
+    $ring->analyseKeyspace("MyPCBackup");
+
+    $mxj       = new Client($server);
+
+    var_dump_json($mxj->loadAttribute(
+        'org.apache.cassandra.net','map','SimpleStates',['type' => 'FailureDetector']
+      ));
+
+
     $readStage = $mxj->loadMBean(
       'org.apache.cassandra.request',
       ['type' => 'ReadStage']
@@ -39,6 +53,15 @@ class DefaultController extends WebpageController
     $mutationStage = $mxj->loadMBean(
       'org.apache.cassandra.request',
       ['type' => 'MutationStage']
+    );
+    var_dump_json($mutationStage);
+    $mutationStage = $mxj->loadMBean(
+      'org.apache.cassandra.db',
+      [
+        'type' => 'ColumnFamilies',
+        'keyspace' => 'MyPCBackup',
+        'columnfamily' => 'Affiliate_Hop_Followed'
+      ]
     );
     var_dump_json($mutationStage);
   }

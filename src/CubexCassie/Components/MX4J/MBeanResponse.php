@@ -17,21 +17,47 @@ class MBeanResponse extends DataMapper
   public function __construct($rawXml)
   {
     //Convert to some pretty arrays
-    $data = json_decode(
+    $data               = json_decode(
       json_encode(new \SimpleXMLElement($rawXml)),
       true
     );
-
     $this->_classname   = $data['@attributes']['classname'];
     $this->_description = $data['@attributes']['description'];
     $this->_objectName  = $data['@attributes']['objectname'];
+
     foreach($data['Attribute'] as $attr)
     {
+      if($attr['classname'] === 'java.util.Map')
+      {
+        $value = $this->map($data['Attribute']['Map']);
+      }
+      else if($attr['@attributes']['value'])
+      {
+        $value = $attr['@attributes']['value'];
+      }
+      else
+      {
+        continue;
+      }
+      //TODO: Support  aggregation="array"
+      //TODO: Support  aggregation="collection"
+      //TODO: Support  aggregation="map"
       $this->_addAttribute(
         new Attribute(
-          $attr['@attributes']['name'], false, null, $attr['@attributes']['value']
+          $attr['@attributes']['name'], false, null, $value
         )
       );
     }
+  }
+
+  public function map($map)
+  {
+    $result = [];
+    foreach($map['Element'] as $item)
+    {
+      $itm                   = $item['@attributes'];
+      $result[$itm['index']] = [$itm['key'] => $itm['element']];
+    }
+    return $result;
   }
 }
