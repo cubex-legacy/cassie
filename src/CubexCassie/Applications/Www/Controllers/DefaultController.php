@@ -32,18 +32,22 @@ class DefaultController extends WebpageController
 
   public function renderIndex()
   {
-    $server = $this->config('cassie')->getStr('server');
+    $server     = $this->config('cassie')->getStr('server');
     $connection = new Connection([$server]);
 
     $ring = new Ring($connection);
     $ring->analyseKeyspace("MyPCBackup");
 
-    $mxj       = new Client($server);
+    $mxj = new Client($server);
 
-    var_dump_json($mxj->loadAttribute(
-        'org.apache.cassandra.net','map','SimpleStates',['type' => 'FailureDetector']
-      ));
-
+    var_dump_json(
+      $mxj->loadAttribute(
+        'org.apache.cassandra.net',
+        'map',
+        'SimpleStates',
+        ['type' => 'FailureDetector']
+      )
+    );
 
     $readStage = $mxj->loadMBean(
       'org.apache.cassandra.request',
@@ -58,9 +62,9 @@ class DefaultController extends WebpageController
     $mutationStage = $mxj->loadMBean(
       'org.apache.cassandra.db',
       [
-        'type' => 'ColumnFamilies',
-        'keyspace' => 'MyPCBackup',
-        'columnfamily' => 'Affiliate_Hop_Followed'
+      'type'         => 'ColumnFamilies',
+      'keyspace'     => 'MyPCBackup',
+      'columnfamily' => 'Affiliate_Hop_Followed'
       ]
     );
     var_dump_json($mutationStage);
