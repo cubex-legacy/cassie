@@ -25,10 +25,12 @@ class CompactionStats extends BaseCliTool
       "total",
       "Progress"
     );
-    $activeCompactions  = 0;
+    $activeCompactions = 0;
 
     if(is_array($stats->compactions))
     {
+      $totals = ['completed' => 0, 'total' => 0];
+
       foreach($stats->compactions as $compaction)
       {
         $activeCompactions++;
@@ -40,9 +42,24 @@ class CompactionStats extends BaseCliTool
           Numbers::bytesToHumanReadable($compaction->total),
           (round($compaction->completed / $compaction->total * 100, 2) . '%')
         );
+        $totals['completed'] += $compaction->completed;
+        $totals['total'] += $compaction->total;
       }
-      echo $compactionTable;
+
+      $compactionTable->appendRow(
+        'Active Totals',
+        '',
+        '',
+        Numbers::bytesToHumanReadable($totals['completed']),
+        Numbers::bytesToHumanReadable($totals['total']),
+        (round(
+          $totals['completed'] / $totals['total'] * 100,
+          2
+        ) . '%')
+      );
     }
+
+    echo $compactionTable;
 
     echo "\nActive Compactions: " . $activeCompactions;
     echo "\nPending Compactions: " . ($stats->pendingTasks - $activeCompactions);
