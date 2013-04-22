@@ -46,6 +46,8 @@ class CompactionStats extends BaseCliTool
         $totals['total'] += $compaction->total;
       }
 
+      $compactionTable->appendSpacer();
+
       $compactionTable->appendRow(
         'Active Totals',
         '',
