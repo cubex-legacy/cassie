@@ -27,7 +27,7 @@ class CompactionStats extends BaseCliTool
     );
     $activeCompactions = 0;
 
-    if(is_array($stats->compactions))
+    if(is_array($stats->compactions) && !empty($stats->compactions))
     {
       $totals = ['completed' => 0, 'total' => 0];
 
