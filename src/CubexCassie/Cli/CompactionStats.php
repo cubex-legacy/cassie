@@ -119,7 +119,7 @@ class CompactionStats extends BaseCliTool
 
       if($activeCompactions > 0)
       {
-        echo $compactionTable;
+        $screenOut .= $compactionTable;
       }
 
       $time                    = time();
