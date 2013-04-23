@@ -5,6 +5,7 @@
 
 namespace CubexCassie\Cli;
 
+use Cubex\Cli\Shell;
 use Cubex\Helpers\Numbers;
 use Cubex\Text\TextTable;
 
@@ -12,9 +13,29 @@ class CompactionStats extends BaseCliTool
 {
   public function execute()
   {
-    $stats = $this->_getMx4jClient()->loadMBean(
-      "org.apache.cassandra.db:type=CompactionManager"
-    );
+    try
+    {
+      $stats = $this->_getMx4jClient()->loadMBean(
+        "org.apache.cassandra.db:type=CompactionManager"
+      );
+    }
+    catch(\Exception $e)
+    {
+      echo Shell::colourText(
+        "A connection to ",
+        Shell::COLOUR_FOREGROUND_RED
+      );
+      echo Shell::colourText(
+        $this->host,
+        Shell::COLOUR_FOREGROUND_PURPLE
+      );
+      echo Shell::colourText(
+        " could not be established.",
+        Shell::COLOUR_FOREGROUND_RED
+      );
+      echo "\n";
+      return;
+    }
 
     $compactionTable = new TextTable();
     $compactionTable->setColumnHeaders(
@@ -26,6 +47,10 @@ class CompactionStats extends BaseCliTool
       "Progress"
     );
     $activeCompactions = 0;
+    if(!isset($stats->pendingTasks))
+    {
+      $stats->pendingTasks = 0;
+    }
 
     if(is_array($stats->compactions))
     {
