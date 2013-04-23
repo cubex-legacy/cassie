@@ -129,6 +129,24 @@ class CompactionStats extends BaseCliTool
       {
         $compactionTable->appendSpacer();
 
+        $totalRemaining = $this->_calculateBps(
+          'total', $totals['completed'], $totals['total']
+        );
+        $secs           = $bps = 'Unknown';
+
+        if($this->_previousTime > 0)
+        {
+          if($totalRemaining['seconds'] > 0)
+          {
+            $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
+          }
+
+          if($totalRemaining['bps'] > 0)
+          {
+            $bps = Numbers::bytesToHumanReadable($totalRemaining['bps']);
+          }
+        }
+
         $compactionTable->appendRow(
           'Active Totals',
           '',
@@ -138,34 +156,15 @@ class CompactionStats extends BaseCliTool
           (round(
             $totals['completed'] / $totals['total'] * 100,
             2
-          ) . '%')
+          ) . '%'),
+          $secs,
+          $bps
         );
       }
 
       if($activeCompactions > 0)
       {
         $screenOut .= $compactionTable;
-      }
-
-      $totalRemaining = $this->_calculateBps(
-        'total', $totals['completed'], $totals['total']
-      );
-      $secondsLeft    = $totalRemaining['seconds'];
-      $abps           = $totalRemaining['bps'];
-
-      if($this->_previousTime > 0)
-      {
-        if($secondsLeft > 0)
-        {
-          $screenOut .= "\nEstimated Time Remaining: ";
-          $screenOut .= Numbers::formatMicroTime($secondsLeft);
-        }
-
-        if($abps > 0)
-        {
-          $screenOut .= "\nEstimated Data Speed: ";
-          $screenOut .= Numbers::bytesToHumanReadable($abps) . '/s';
-        }
       }
 
       $this->_previousBytes['total'] = $totals['completed'];
