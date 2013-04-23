@@ -84,7 +84,8 @@ class CompactionStats extends BaseCliTool
 
     if(is_array($stats->compactions))
     {
-      $totals = ['completed' => 0, 'total' => 0];
+      $totals     = ['completed' => 0, 'total' => 0];
+      $maxSeconds = 0;
 
       foreach($stats->compactions as $compaction)
       {
@@ -100,6 +101,10 @@ class CompactionStats extends BaseCliTool
         {
           if($totalRemaining['seconds'] > 0)
           {
+            if($totalRemaining['seconds'] > $maxSeconds)
+            {
+              $maxSeconds = $totalRemaining['seconds'];
+            }
             $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
           }
 
@@ -138,6 +143,10 @@ class CompactionStats extends BaseCliTool
         {
           if($totalRemaining['seconds'] > 0)
           {
+            if($maxSeconds > $totalRemaining['seconds'])
+            {
+              $totalRemaining['seconds'] = $maxSeconds;
+            }
             $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
           }
 
