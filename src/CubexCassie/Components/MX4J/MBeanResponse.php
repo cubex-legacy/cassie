@@ -6,9 +6,9 @@
 namespace CubexCassie\Components\MX4J;
 
 use Cubex\Data\Attribute;
-use Cubex\Mapper\DataMapper;
+use Cubex\Mapper\KeyValue\KvMapper;
 
-class MBeanResponse extends DataMapper
+class MBeanResponse extends KvMapper
 {
   protected $_classname;
   protected $_description;

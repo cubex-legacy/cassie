@@ -90,9 +90,14 @@ class CompactionStats extends BaseCliTool
         echo $compactionTable;
       }
     }
+    $pending = ($stats->pendingTasks - $activeCompactions);
+    if($pending < 0)
+    {
+      $pending = 0;
+    }
 
     echo "\nActive Compactions: " . $activeCompactions;
-    echo "\nPending Compactions: " . ($stats->pendingTasks - $activeCompactions);
+    echo "\nPending Compactions: " . $pending;
     echo "\n";
   }
 }
