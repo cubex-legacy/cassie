@@ -118,10 +118,14 @@ class CompactionStats extends BaseCliTool
         $screenOut .= $compactionTable;
       }
 
-      $time                    = time();
-      $processed               = $totals['completed'] - $this->_previousBytes;
-      $taken                   = $time - $this->_previousTime;
-      $this->_bytesPerSecond[] = ($processed / $taken);
+      $time      = time();
+      $processed = $totals['completed'] - $this->_previousBytes;
+      $taken     = $time - $this->_previousTime;
+      $bps       = ($processed / $taken);
+      if($bps > 10)
+      {
+        $this->_bytesPerSecond[] = $bps;
+      }
 
       $abps = array_sum($this->_bytesPerSecond) / count($this->_bytesPerSecond);
 
