@@ -206,6 +206,13 @@ class CompactionStats extends BaseCliTool
     $remaining   = $total - $completed;
     $secondsLeft = $remaining / $abps;
 
-    return ['seconds' => $secondsLeft, 'bps' => $abps];
+    if($processed === 0 && $id !== 'total')
+    {
+      return ['seconds' => 0, 'bps' => 0];
+    }
+    else
+    {
+      return ['seconds' => $secondsLeft, 'bps' => $abps];
+    }
   }
 }
