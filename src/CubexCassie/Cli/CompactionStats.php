@@ -130,8 +130,13 @@ class CompactionStats extends BaseCliTool
 
       if($this->_previousTime > 0)
       {
-        $screenOut .= "\nEstimated Time Remaining: ";
-        $screenOut .= Numbers::formatMicroTime($secondsLeft);
+        if($secondsLeft > 0)
+        {
+          $screenOut .= "\nEstimated Time Remaining: ";
+          $screenOut .= Numbers::formatMicroTime($secondsLeft);
+        }
+        $screenOut .= "\nEstimated Data Speed: ";
+        $screenOut .= Numbers::bytesToHumanReadable($abps) . '/s';
       }
 
       $this->_previousBytes = $totals['completed'];
