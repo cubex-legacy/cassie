@@ -11,8 +11,37 @@ use Cubex\Text\TextTable;
 
 class CompactionStats extends BaseCliTool
 {
+  public $remaining;
+  /**
+   * @valuerequired
+   */
+  public $pause = 2;
+
+  protected $_previousBytes;
+  protected $_previousTime;
+  protected $_bytesPerSecond;
+
   public function execute()
   {
+    if($this->remaining)
+    {
+      while(true)
+      {
+        Shell::redrawScreen($this->_getGetStats());
+        flush();
+        ob_flush();
+        sleep($this->pause);
+      }
+    }
+    else
+    {
+      echo $this->_getGetStats();
+    }
+  }
+
+  protected function _getGetStats()
+  {
+    $screenOut = '';
     try
     {
       $stats = $this->_getMx4jClient()->loadMBean(
@@ -21,20 +50,20 @@ class CompactionStats extends BaseCliTool
     }
     catch(\Exception $e)
     {
-      echo Shell::colourText(
+      $screenOut .= Shell::colourText(
         "A connection to ",
         Shell::COLOUR_FOREGROUND_RED
       );
-      echo Shell::colourText(
+      $screenOut .= Shell::colourText(
         $this->host,
         Shell::COLOUR_FOREGROUND_PURPLE
       );
-      echo Shell::colourText(
+      $screenOut .= Shell::colourText(
         " could not be established.",
         Shell::COLOUR_FOREGROUND_RED
       );
-      echo "\n";
-      return;
+      $screenOut .= "\n";
+      return $screenOut;
     }
 
     $compactionTable = new TextTable();
@@ -92,6 +121,25 @@ class CompactionStats extends BaseCliTool
       {
         echo $compactionTable;
       }
+
+      $time                    = time();
+      $processed               = $totals['completed'] - $this->_previousBytes;
+      $taken                   = $time - $this->_previousTime;
+      $this->_bytesPerSecond[] = ($processed / $taken);
+
+      $abps = array_sum($this->_bytesPerSecond) / count($this->_bytesPerSecond);
+
+      $remaining   = $totals['total'] - $totals['completed'];
+      $secondsLeft = $remaining / $abps;
+
+      if($this->_previousTime > 0)
+      {
+        echo "\nEstimated Time Remaining: ";
+        echo Numbers::formatMicroTime($secondsLeft);
+      }
+
+      $this->_previousBytes = $totals['completed'];
+      $this->_previousTime  = $time;
     }
     $pending = ($stats->pendingTasks - $activeCompactions);
     if($pending < 0)
@@ -99,8 +147,9 @@ class CompactionStats extends BaseCliTool
       $pending = 0;
     }
 
-    echo "\nActive Compactions: " . $activeCompactions;
-    echo "\nPending Compactions: " . $pending;
-    echo "\n";
+    $screenOut .= "\nActive Compactions: " . $activeCompactions;
+    $screenOut .= "\nPending Compactions: " . $pending;
+    $screenOut .= "\n";
+    return $screenOut;
   }
 }
