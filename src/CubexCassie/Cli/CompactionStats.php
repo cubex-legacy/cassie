@@ -76,10 +76,6 @@ class CompactionStats extends BaseCliTool
       "Progress"
     );
     $activeCompactions = 0;
-    if(!isset($stats->pendingTasks))
-    {
-      $stats->pendingTasks = 0;
-    }
 
     if(is_array($stats->compactions))
     {
