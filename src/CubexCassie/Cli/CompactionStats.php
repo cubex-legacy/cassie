@@ -124,10 +124,12 @@ class CompactionStats extends BaseCliTool
           $secs,
           $bps
         );
+
         $totals['completed'] += $compaction->completed;
         $totals['total'] += $compaction->total;
-
-        $this->_previousBytes[$compaction->id] = $compaction->completed;
+        $this->_previousBytes[md5(
+          $compaction->id . $compaction->total
+        )] = $compaction->completed;
       }
 
       if($activeCompactions > 1)
@@ -199,6 +201,10 @@ class CompactionStats extends BaseCliTool
 
   protected function _calculateBps($id, $completed, $total)
   {
+    if($id !== 'total')
+    {
+      $id = md5($id . $total);
+    }
     $processed = $completed - $this->_previousBytes[$id];
     $taken     = $this->_time - $this->_previousTime;
     $bps       = ($processed / $taken);
