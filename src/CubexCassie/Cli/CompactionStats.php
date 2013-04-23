@@ -71,19 +71,22 @@ class CompactionStats extends BaseCliTool
         $totals['total'] += $compaction->total;
       }
 
-      $compactionTable->appendSpacer();
+      if($activeCompactions > 1)
+      {
+        $compactionTable->appendSpacer();
 
-      $compactionTable->appendRow(
-        'Active Totals',
-        '',
-        '',
-        Numbers::bytesToHumanReadable($totals['completed']),
-        Numbers::bytesToHumanReadable($totals['total']),
-        (round(
-          $totals['completed'] / $totals['total'] * 100,
-          2
-        ) . '%')
-      );
+        $compactionTable->appendRow(
+          'Active Totals',
+          '',
+          '',
+          Numbers::bytesToHumanReadable($totals['completed']),
+          Numbers::bytesToHumanReadable($totals['total']),
+          (round(
+            $totals['completed'] / $totals['total'] * 100,
+            2
+          ) . '%')
+        );
+      }
 
       if($activeCompactions > 0)
       {
