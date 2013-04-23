@@ -134,8 +134,8 @@ class CompactionStats extends BaseCliTool
 
       if($this->_previousTime > 0)
       {
-        echo "\nEstimated Time Remaining: ";
-        echo Numbers::formatMicroTime($secondsLeft);
+        $screenOut .= "\nEstimated Time Remaining: ";
+        $screenOut .= Numbers::formatMicroTime($secondsLeft);
       }
 
       $this->_previousBytes = $totals['completed'];
