@@ -25,6 +25,11 @@ abstract class BaseCliTool extends CliCommand
    */
   public $jmxPort = 8081;
 
+  /**
+   * @valuerequired
+   */
+  public $timeout = 5;
+
   protected $_connection;
   protected $_mx4jClient;
 
@@ -33,6 +38,9 @@ abstract class BaseCliTool extends CliCommand
     if($this->_connection === null)
     {
       $this->_connection = new Connection([$this->host], $this->port);
+      $this->_connection->setConnectTimeout($this->timeout);
+      $this->_connection->setReceiveTimeout($this->timeout);
+      $this->_connection->setSendTimeout($this->timeout);
     }
     return $this->_connection;
   }
@@ -41,7 +49,7 @@ abstract class BaseCliTool extends CliCommand
   {
     if($this->_mx4jClient === null)
     {
-      $this->_mx4jClient = new Client($this->host, $this->jmxPort);
+      $this->_mx4jClient = new Client($this->host, $this->jmxPort, $this->timeout);
     }
     return $this->_mx4jClient;
   }

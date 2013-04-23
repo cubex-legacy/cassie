@@ -11,11 +11,13 @@ class Client
 {
   protected $_server;
   protected $_port;
+  protected $_timeout;
 
-  public function __construct($server = 'localhost', $port = 8081)
+  public function __construct($server = 'localhost', $port = 8081, $timeout = 5)
   {
-    $this->_server = $server;
-    $this->_port   = $port;
+    $this->_server  = $server;
+    $this->_port    = $port;
+    $this->_timeout = $timeout;
   }
 
   public function loadMBean($objectName, array $parameters = null)
@@ -50,6 +52,6 @@ class Client
   protected function _directCall($path)
   {
     $uri = sprintf("http://%s:%d/", $this->_server, $this->_port) . $path;
-    return Curl::request($uri, 5);
+    return Curl::request($uri, $this->_timeout);
   }
 }
