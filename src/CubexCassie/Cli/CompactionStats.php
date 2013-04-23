@@ -142,10 +142,15 @@ class CompactionStats extends BaseCliTool
       $this->_previousBytes = $totals['completed'];
       $this->_previousTime  = $time;
     }
-    $pending = ($stats->pendingTasks - $activeCompactions);
-    if($pending < 0)
+
+    $pending = 0;
+    if(isset($stats->pendingTasks))
     {
-      $pending = 0;
+      $pending = ($stats->pendingTasks - $activeCompactions);
+      if($pending < 0)
+      {
+        $pending = 0;
+      }
     }
 
     $screenOut .= "\nActive Compactions: " . $activeCompactions;
