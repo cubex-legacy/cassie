@@ -20,6 +20,7 @@ class CompactionStats extends BaseCliTool
   protected $_previousBytes;
   protected $_previousTime;
   protected $_bytesPerSecond;
+  protected $_time;
 
   public function execute()
   {
@@ -73,9 +74,13 @@ class CompactionStats extends BaseCliTool
       "Column Family",
       "Completed",
       "total",
-      "Progress"
+      "Progress",
+      "Remaining",
+      "Speed"
     );
     $activeCompactions = 0;
+
+    $this->_time = time();
 
     if(is_array($stats->compactions))
     {
@@ -84,16 +89,40 @@ class CompactionStats extends BaseCliTool
       foreach($stats->compactions as $compaction)
       {
         $activeCompactions++;
+
+        $totalRemaining = $this->_calculateBps(
+          $compaction->id, $compaction->completed, $compaction->total
+        );
+
+        $secs = $bps = 'Unknown';
+
+        if($this->_previousTime > 0)
+        {
+          if($totalRemaining['seconds'] > 0)
+          {
+            $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
+          }
+
+          if($totalRemaining['bps'] > 0)
+          {
+            $bps = Numbers::bytesToHumanReadable($totalRemaining['bps']);
+          }
+        }
+
         $compactionTable->appendRow(
           $compaction->taskType,
           $compaction->keyspace,
           $compaction->columnfamily,
           Numbers::bytesToHumanReadable($compaction->completed),
           Numbers::bytesToHumanReadable($compaction->total),
-          (round($compaction->completed / $compaction->total * 100, 2) . '%')
+          (round($compaction->completed / $compaction->total * 100, 2) . '%'),
+          $secs,
+          $bps
         );
         $totals['completed'] += $compaction->completed;
         $totals['total'] += $compaction->total;
+
+        $this->_previousBytes[$compaction->id] = $compaction->completed;
       }
 
       if($activeCompactions > 1)
@@ -118,19 +147,11 @@ class CompactionStats extends BaseCliTool
         $screenOut .= $compactionTable;
       }
 
-      $time      = time();
-      $processed = $totals['completed'] - $this->_previousBytes;
-      $taken     = $time - $this->_previousTime;
-      $bps       = ($processed / $taken);
-      if($bps > 10)
-      {
-        $this->_bytesPerSecond[] = $bps;
-      }
-
-      $abps = array_sum($this->_bytesPerSecond) / count($this->_bytesPerSecond);
-
-      $remaining   = $totals['total'] - $totals['completed'];
-      $secondsLeft = $remaining / $abps;
+      $totalRemaining = $this->_calculateBps(
+        'total', $totals['completed'], $totals['total']
+      );
+      $secondsLeft    = $totalRemaining['seconds'];
+      $abps           = $totalRemaining['bps'];
 
       if($this->_previousTime > 0)
       {
@@ -147,9 +168,10 @@ class CompactionStats extends BaseCliTool
         }
       }
 
-      $this->_previousBytes = $totals['completed'];
-      $this->_previousTime  = $time;
+      $this->_previousBytes['total'] = $totals['completed'];
     }
+
+    $this->_previousTime = $this->_time;
 
     $pending = 0;
     if(isset($stats->pendingTasks))
@@ -165,5 +187,25 @@ class CompactionStats extends BaseCliTool
     $screenOut .= "\nPending Compactions: " . $pending;
     $screenOut .= "\n";
     return $screenOut;
+  }
+
+  protected function _calculateBps($id, $completed, $total)
+  {
+    $processed = $completed - $this->_previousBytes[$id];
+    $taken     = $this->_time - $this->_previousTime;
+    $bps       = ($processed / $taken);
+    if($bps > 10)
+    {
+      $this->_bytesPerSecond[$id][] = $bps;
+    }
+
+    $abps = array_sum($this->_bytesPerSecond[$id]) / count(
+      $this->_bytesPerSecond[$id]
+    );
+
+    $remaining   = $total - $completed;
+    $secondsLeft = $remaining / $abps;
+
+    return ['seconds' => $secondsLeft, 'bps' => $abps];
   }
 }
