@@ -6,6 +6,7 @@
 namespace CubexCassie\Cli;
 
 use Cubex\Cli\Shell;
+use Cubex\Helpers\DateTimeHelper;
 use Cubex\Helpers\Numbers;
 use Cubex\Text\TextTable;
 
@@ -73,7 +74,7 @@ class CompactionStats extends BaseCliTool
       "Keyspace",
       "Column Family",
       "Completed",
-      "total",
+      "Total",
       "Progress",
       "Remaining",
       "Speed"
@@ -92,7 +93,9 @@ class CompactionStats extends BaseCliTool
         $activeCompactions++;
 
         $totalRemaining = $this->_calculateBps(
-          $compaction->id, $compaction->completed, $compaction->total
+          $compaction->id,
+          $compaction->completed,
+          $compaction->total
         );
 
         $secs = $bps = 'Unknown';
@@ -105,7 +108,7 @@ class CompactionStats extends BaseCliTool
             {
               $maxSeconds = $totalRemaining['seconds'];
             }
-            $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
+            $secs = DateTimeHelper::secondsToTime($totalRemaining['seconds']);
           }
 
           if($totalRemaining['bps'] > 0)
@@ -137,7 +140,9 @@ class CompactionStats extends BaseCliTool
         $compactionTable->appendSpacer();
 
         $totalRemaining = $this->_calculateBps(
-          'total', $totals['completed'], $totals['total']
+          'total',
+          $totals['completed'],
+          $totals['total']
         );
         $secs           = $bps = 'Unknown';
 
@@ -149,7 +154,7 @@ class CompactionStats extends BaseCliTool
             {
               $totalRemaining['seconds'] = $maxSeconds;
             }
-            $secs = Numbers::formatMicroTime($totalRemaining['seconds']);
+            $secs = DateTimeHelper::secondsToTime($totalRemaining['seconds']);
           }
 
           if($totalRemaining['bps'] > 0)
