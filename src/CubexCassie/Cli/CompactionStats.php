@@ -52,6 +52,13 @@ class CompactionStats extends BaseCliTool
 
     foreach($hosts as $host)
     {
+      if($this->multihost)
+      {
+        echo Shell::colourText(
+          "Processing $host",
+          Shell::COLOUR_FOREGROUND_GREEN
+        ) . "\n";
+      }
       if($this->remaining)
       {
         while(true)
