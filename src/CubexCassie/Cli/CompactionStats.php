@@ -8,10 +8,18 @@ namespace CubexCassie\Cli;
 use Cubex\Cli\Shell;
 use Cubex\Helpers\DateTimeHelper;
 use Cubex\Helpers\Numbers;
+use Cubex\Helpers\Strings;
 use Cubex\Text\TextTable;
+use CubexCassie\Components\MX4J\Client;
 
 class CompactionStats extends BaseCliTool
 {
+  /**
+   * Range of servers to loop through
+   * @valuerequired
+   */
+  public $multihost;
+
   public $remaining;
   /**
    * @valuerequired
@@ -25,28 +33,57 @@ class CompactionStats extends BaseCliTool
 
   public function execute()
   {
-    if($this->remaining)
+    if($this->multihost)
     {
-      while(true)
+      if($this->remaining)
       {
-        Shell::redrawScreen($this->_getGetStats());
-        flush();
-        ob_flush();
-        sleep($this->pause);
+        echo Shell::colourText(
+          "Remaining calculations are not currently supported with multi hosts",
+          Shell::COLOUR_FOREGROUND_RED
+        );
+        return;
       }
+      $hosts = Strings::stringToRange($this->multihost);
     }
     else
     {
-      echo $this->_getGetStats();
+      $hosts = [$this->host];
+    }
+
+    foreach($hosts as $host)
+    {
+      if($this->remaining)
+      {
+        while(true)
+        {
+          Shell::redrawScreen($this->_getGetStats($host));
+          flush();
+          ob_flush();
+          sleep($this->pause);
+        }
+      }
+      else
+      {
+        echo $this->_getGetStats($host);
+      }
+      echo "\n";
     }
   }
 
-  protected function _getGetStats()
+  protected function _getGetStats($host = null)
   {
     $screenOut = '';
     try
     {
-      $stats = $this->_getMx4jClient()->loadMBean(
+      if($host === null)
+      {
+        $client = $this->_getMx4jClient();
+      }
+      else
+      {
+        $client = new Client($this->host, $this->jmxPort, $this->timeout);
+      }
+      $stats = $client->loadMBean(
         "org.apache.cassandra.db:type=CompactionManager"
       );
     }
