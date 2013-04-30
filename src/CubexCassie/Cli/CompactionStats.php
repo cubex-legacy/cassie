@@ -20,6 +20,8 @@ class CompactionStats extends BaseCliTool
    */
   public $multihost;
 
+  public $redrawScreen = true;
+
   public $showHostname;
 
   public $remaining;
@@ -59,7 +61,14 @@ class CompactionStats extends BaseCliTool
 
         $screen .= $this->_getGetStats($host) . "\n";
       }
-      Shell::redrawScreen($screen);
+      if($this->redrawScreen)
+      {
+        Shell::redrawScreen($screen);
+      }
+      else
+      {
+        echo $screen;
+      }
       if($this->remaining)
       {
         sleep($this->pause);
