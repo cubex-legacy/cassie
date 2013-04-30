@@ -235,8 +235,14 @@ class CompactionStats extends BaseCliTool
       }
     }
 
-    $screenOut .= "\nActive Compactions: " . $activeCompactions;
-    $screenOut .= "\nPending Compactions: " . $pending;
+    if($activeCompactions > 0)
+    {
+      $screenOut .= "\nActive Compactions:  " . $activeCompactions;
+    }
+    if($pending > 0)
+    {
+      $screenOut .= "\nPending Compactions: " . $pending;
+    }
     $screenOut .= "\n";
     return $screenOut;
   }
