@@ -136,6 +136,18 @@ class CompactionStats extends BaseCliTool
       {
         $activeCompactions++;
 
+        /**
+         * Cassandra pre 1.2 var name changes
+         */
+        if(isset($compaction->bytesComplete) && !isset($compaction->completed))
+        {
+          $compaction->completed = $compaction->bytesComplete;
+        }
+        if(isset($compaction->totalBytes) && !isset($compaction->total))
+        {
+          $compaction->total = $compaction->totalBytes;
+        }
+
         $totalRemaining = $this->_calculateBps(
           $compaction->id,
           $compaction->completed,
