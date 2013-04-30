@@ -20,6 +20,8 @@ class CompactionStats extends BaseCliTool
    */
   public $multihost;
 
+  public $showHostname;
+
   public $remaining;
   /**
    * @valuerequired
@@ -35,14 +37,6 @@ class CompactionStats extends BaseCliTool
   {
     if($this->multihost)
     {
-      if($this->remaining)
-      {
-        echo Shell::colourText(
-          "Remaining calculations are not currently supported with multi hosts",
-          Shell::COLOUR_FOREGROUND_RED
-        );
-        return;
-      }
       $hosts = Strings::stringToRange($this->multihost);
     }
     else
@@ -50,31 +44,28 @@ class CompactionStats extends BaseCliTool
       $hosts = [$this->host];
     }
 
-    foreach($hosts as $host)
+    do
     {
-      if($this->multihost)
+      $screen = "";
+      foreach($hosts as $host)
       {
-        echo Shell::colourText(
-          "Processing $host",
-          Shell::COLOUR_FOREGROUND_GREEN
-        ) . "\n";
+        if($this->showHostname)
+        {
+          $screen .= Shell::colourText(
+            "Processing $host",
+            Shell::COLOUR_FOREGROUND_GREEN
+          ) . "\n";
+        }
+
+        $screen .= $this->_getGetStats($host) . "\n";
       }
+      Shell::redrawScreen($screen);
       if($this->remaining)
       {
-        while(true)
-        {
-          Shell::redrawScreen($this->_getGetStats($host));
-          flush();
-          ob_flush();
-          sleep($this->pause);
-        }
+        sleep($this->pause);
       }
-      else
-      {
-        echo $this->_getGetStats($host);
-      }
-      echo "\n";
     }
+    while($this->remaining);
   }
 
   protected function _getGetStats($host = null)
@@ -139,7 +130,8 @@ class CompactionStats extends BaseCliTool
         $totalRemaining = $this->_calculateBps(
           $compaction->id,
           $compaction->completed,
-          $compaction->total
+          $compaction->total,
+          $host
         );
 
         $secs = $bps = 'Unknown';
@@ -186,7 +178,8 @@ class CompactionStats extends BaseCliTool
         $totalRemaining = $this->_calculateBps(
           'total',
           $totals['completed'],
-          $totals['total']
+          $totals['total'],
+          $host
         );
         $secs           = $bps = 'Unknown';
 
@@ -248,22 +241,22 @@ class CompactionStats extends BaseCliTool
     return $screenOut;
   }
 
-  protected function _calculateBps($id, $completed, $total)
+  protected function _calculateBps($id, $completed, $total, $host = 'default')
   {
     if($id !== 'total')
     {
       $id = md5($id . $total);
     }
-    $processed = $completed - $this->_previousBytes[$id];
+    $processed = $completed - $this->_previousBytes[$host][$id];
     $taken     = $this->_time - $this->_previousTime;
     $bps       = ($processed / $taken);
     if($bps > 10)
     {
-      $this->_bytesPerSecond[$id][] = $bps;
+      $this->_bytesPerSecond[$host][$id][] = $bps;
     }
 
-    $abps = array_sum($this->_bytesPerSecond[$id]) / count(
-      $this->_bytesPerSecond[$id]
+    $abps = array_sum($this->_bytesPerSecond[$host][$id]) / count(
+      $this->_bytesPerSecond[$host][$id]
     );
 
     $remaining   = $total - $completed;
