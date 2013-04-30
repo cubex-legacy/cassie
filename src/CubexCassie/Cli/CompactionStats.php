@@ -94,7 +94,7 @@ class CompactionStats extends BaseCliTool
         Shell::COLOUR_FOREGROUND_RED
       );
       $screenOut .= Shell::colourText(
-        $this->host,
+        $host,
         Shell::COLOUR_FOREGROUND_PURPLE
       );
       $screenOut .= Shell::colourText(
