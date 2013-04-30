@@ -136,7 +136,7 @@ class CompactionStats extends BaseCliTool
 
         $secs = $bps = 'Unknown';
 
-        if($this->_previousTime > 0)
+        if($this->_previousTime[$host] > 0)
         {
           if($totalRemaining['seconds'] > 0)
           {
@@ -166,7 +166,7 @@ class CompactionStats extends BaseCliTool
 
         $totals['completed'] += $compaction->completed;
         $totals['total'] += $compaction->total;
-        $this->_previousBytes[md5(
+        $this->_previousBytes[$host][md5(
           $compaction->id . $compaction->total
         )] = $compaction->completed;
       }
@@ -183,7 +183,7 @@ class CompactionStats extends BaseCliTool
         );
         $secs           = $bps = 'Unknown';
 
-        if($this->_previousTime > 0)
+        if($this->_previousTime[$host] > 0)
         {
           if($totalRemaining['seconds'] > 0)
           {
@@ -220,10 +220,10 @@ class CompactionStats extends BaseCliTool
         $screenOut .= $compactionTable;
       }
 
-      $this->_previousBytes['total'] = $totals['completed'];
+      $this->_previousBytes[$host]['total'] = $totals['completed'];
     }
 
-    $this->_previousTime = $this->_time;
+    $this->_previousTime[$host] = $this->_time;
 
     $pending = 0;
     if(isset($stats->pendingTasks))
@@ -248,7 +248,7 @@ class CompactionStats extends BaseCliTool
       $id = md5($id . $total);
     }
     $processed = $completed - $this->_previousBytes[$host][$id];
-    $taken     = $this->_time - $this->_previousTime;
+    $taken     = $this->_time - $this->_previousTime[$host];
     $bps       = ($processed / $taken);
     if($bps > 10)
     {
