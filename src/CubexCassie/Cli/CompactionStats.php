@@ -81,7 +81,7 @@ class CompactionStats extends BaseCliTool
       }
       else
       {
-        $client = new Client($this->host, $this->jmxPort, $this->timeout);
+        $client = new Client($host, $this->jmxPort, $this->timeout);
       }
       $stats = $client->loadMBean(
         "org.apache.cassandra.db:type=CompactionManager"
