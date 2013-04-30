@@ -20,8 +20,6 @@ class CompactionStats extends BaseCliTool
    */
   public $multihost;
 
-  public $redrawScreen = true;
-
   public $showHostname;
 
   public $remaining;
@@ -29,6 +27,8 @@ class CompactionStats extends BaseCliTool
    * @valuerequired
    */
   public $pause = 2;
+
+  public $redrawScreen = true;
 
   protected $_previousBytes;
   protected $_previousTime;
