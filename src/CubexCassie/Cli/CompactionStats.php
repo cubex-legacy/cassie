@@ -51,6 +51,13 @@ class CompactionStats extends BaseCliTool
       $screen = "";
       foreach($hosts as $host)
       {
+        $stats = $this->_getGetStats($host);
+
+        if(empty($stats))
+        {
+          continue;
+        }
+
         if($this->showHostname)
         {
           $screen .= Shell::colourText(
@@ -59,7 +66,7 @@ class CompactionStats extends BaseCliTool
           ) . "\n";
         }
 
-        $screen .= $this->_getGetStats($host) . "\n";
+        $screen .= $stats . "\n";
       }
       if($this->redrawScreen)
       {
