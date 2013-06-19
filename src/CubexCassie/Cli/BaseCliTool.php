@@ -6,7 +6,7 @@
 namespace CubexCassie\Cli;
 
 use Cubex\Cli\CliCommand;
-use Cubex\KvStore\Cassandra\Connection;
+use Cubex\Cassandra\Connection;
 use CubexCassie\Components\MX4J\Client;
 
 abstract class BaseCliTool extends CliCommand

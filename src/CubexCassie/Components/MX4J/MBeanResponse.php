@@ -5,10 +5,10 @@
 
 namespace CubexCassie\Components\MX4J;
 
-use Cubex\Data\Attribute;
-use Cubex\Mapper\KeyValue\KvMapper;
+use Cubex\Data\Attribute\Attribute;
+use Cubex\Mapper\DataMapper;
 
-class MBeanResponse extends KvMapper
+class MBeanResponse extends DataMapper
 {
   protected $_classname;
   protected $_description;
