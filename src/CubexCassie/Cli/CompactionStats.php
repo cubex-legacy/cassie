@@ -270,6 +270,19 @@ class CompactionStats extends BaseCliTool
     if($pending > 0)
     {
       $screenOut .= "\nPending Compactions: " . $pending;
+      $pendingSize = 0;
+      if(isset($totals))
+      {
+        $pendingSize = ($totals['total'] / $activeCompactions) * $pending;
+        $screenOut .= "\n   - Estimated Size: ";
+        $screenOut .= Numbers::bytesToHumanReadable($pendingSize);
+      }
+      if(isset($totalRemaining['bps']) && $pendingSize > 0)
+      {
+        $pendingSeconds = $pendingSize / $totalRemaining['bps'];
+        $pendingTime    = DateTimeHelper::secondsToTime($pendingSeconds);
+        $screenOut .= "\n   - Estimated Time: " . $pendingTime;
+      }
     }
     if($activeCompactions + $pending > 0)
     {
