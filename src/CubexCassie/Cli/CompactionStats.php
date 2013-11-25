@@ -46,7 +46,7 @@ class CompactionStats extends BaseCliTool
       $hosts = [$this->host];
     }
 
-    do
+    while(true)
     {
       $screen = "";
       foreach($hosts as $host)
@@ -80,8 +80,11 @@ class CompactionStats extends BaseCliTool
       {
         sleep($this->pause);
       }
+      else
+      {
+        break;
+      }
     }
-    while($this->remaining);
   }
 
   protected function _getGetStats($host = null)

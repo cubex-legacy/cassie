@@ -48,7 +48,6 @@ class Client
     return new MBeanResponse($rawResponse);
   }
 
-
   protected function _directCall($path)
   {
     $uri = sprintf("http://%s:%d/", $this->_server, $this->_port) . $path;
